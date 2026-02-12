@@ -1,0 +1,50 @@
+{
+  "name": "commune-ai",
+  "version": "0.2.66",
+  "description": "Email infrastructure for agents — set up an inbox and send your first email in 30 seconds. Programmatic inboxes (~1 line), consistent threads, custom domains, attachments, and structured data.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "email",
+    "slack",
+    "ai",
+    "agent",
+    "webhook",
+    "communication",
+    "inbox",
+    "api"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/commune-ai/commune"
+  },
+  "homepage": "https://github.com/commune-ai/commune#readme",
+  "bugs": {
+    "url": "https://github.com/commune-ai/commune/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "svix": "^1.44.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "typescript": "^5.5.4"
+  }
+}
