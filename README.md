@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/commune-ai?color=blue&label=npm)](https://www.npmjs.com/package/commune-ai)
 [![npm downloads](https://img.shields.io/npm/dm/commune-ai?label=downloads%2Fmo)](https://www.npmjs.com/package/commune-ai)
 [![Node.js 18+](https://img.shields.io/badge/node-18%2B-blue)](https://www.npmjs.com/package/commune-ai)
-[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Apache-2.0 License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![commune.email](https://img.shields.io/badge/docs-commune.email-blue)](https://commune.email/?ref=commune-ai)
 
 Give your TypeScript/Node.js agent a real inbox. Send email, receive webhooks, manage threads — in 4 lines.
@@ -792,6 +792,16 @@ Free tier: 100 emails/hour, 1,000/day. Pro tier: 10,000/hour, 100,000/day. Enter
 
 ---
 
+## Ecosystem
+
+| Package | Description |
+|---------|-------------|
+| [commune](https://github.com/shanjai-raj/commune) | Email & SMS infrastructure — self-hostable backend |
+| **[commune-ai](https://github.com/shanjai-raj/commune-ai)** | **TypeScript/Node.js SDK** |
+| [commune-python](https://github.com/shanjai-raj/commune-python) | Python SDK |
+| [commune-mcp](https://github.com/shanjai-raj/commune-mcp) | MCP server for Claude Desktop, Cursor, Windsurf |
+| [commune-cli](https://github.com/shanjai-raj/commune-cli) | Command-line interface |
+
 ## License
 
-MIT
+Apache-2.0
