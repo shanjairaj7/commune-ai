@@ -1,4 +1,4 @@
-# TypeScript SDK for Email & SMS in AI Agents
+# TypeScript SDK for Email in AI Agents
 
 [![npm](https://img.shields.io/npm/v/commune-ai?color=blue&label=npm)](https://www.npmjs.com/package/commune-ai)
 [![npm downloads](https://img.shields.io/npm/dm/commune-ai?label=downloads%2Fmo)](https://www.npmjs.com/package/commune-ai)
@@ -796,11 +796,29 @@ Free tier: 100 emails/hour, 1,000/day. Pro tier: 10,000/hour, 100,000/day. Enter
 
 | Package | Description |
 |---------|-------------|
-| [commune](https://github.com/shanjai-raj/commune) | Email & SMS infrastructure — self-hostable backend |
+| [commune](https://github.com/shanjai-raj/commune) | Email infrastructure — self-hostable backend |
 | **[commune-ai](https://github.com/shanjai-raj/commune-ai)** | **TypeScript/Node.js SDK** |
 | [commune-python](https://github.com/shanjai-raj/commune-python) | Python SDK |
 | [commune-mcp](https://github.com/shanjai-raj/commune-mcp) | MCP server for Claude Desktop, Cursor, Windsurf |
 | [commune-cli](https://github.com/shanjai-raj/commune-cli) | Command-line interface |
+
+## Guides
+
+Framework integration tutorials:
+
+- [LangChain agent with email](https://commune.email/blog/email-for-langchain-agents) — BaseTool pattern, send + receive in under 10 min
+- [CrewAI email agent](https://commune.email/blog/crewai-email-agent) — Researcher → Writer → Sender crew, reply webhook
+- [AutoGen email agent](https://commune.email/blog/autogen-email-agent) — function registration, agent-to-agent handoffs via inbox
+- [OpenAI Agents SDK + email](https://commune.email/blog/openai-agents-sdk-email) — tool definitions for the Agents SDK
+
+Comparison pages (if you're evaluating alternatives):
+
+- [SendGrid alternative for AI agents](https://commune.email/sendgrid-alternative)
+- [Mailgun alternative for AI agents](https://commune.email/mailgun-alternative)
+- [Gmail alternative for AI agents](https://commune.email/gmail-alternative-for-ai-agents)
+- [Inbound email API](https://commune.email/inbound-email-api)
+
+---
 
 ## License
 
