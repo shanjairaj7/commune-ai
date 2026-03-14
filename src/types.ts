@@ -558,3 +558,18 @@ export interface CreditCheckoutResult {
   credits: number;
   price: number;
 }
+
+export type FeedbackType = 'error' | 'feature' | 'signal';
+
+export interface FeedbackSubmitPayload {
+  type: FeedbackType;
+  message: string;
+  context?: Record<string, unknown>;
+}
+
+export interface FeedbackResult {
+  id: string;
+  type: FeedbackType;
+  status: 'received';
+  created_at: string;
+}

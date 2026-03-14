@@ -42,6 +42,8 @@ import type {
   CreditBalance,
   CreditBundle,
   CreditCheckoutResult,
+  FeedbackSubmitPayload,
+  FeedbackResult,
 } from './types.js';
 
 const DEFAULT_BASE_URL = 'https://api.commune.email';
@@ -619,6 +621,39 @@ export class CommuneClient {
           bundle,
           ...(returnUrl ? { success_url: returnUrl, cancel_url: returnUrl } : {}),
         },
+      });
+    },
+  };
+
+  feedback = {
+    /**
+     * Submit feedback to the Commune product team.
+     *
+     * Three types:
+     * - `"error"` — something broke or behaved unexpectedly
+     * - `"feature"` — request for new functionality
+     * - `"signal"` — observation, impression, or positive note
+     *
+     * The optional `context` object lets you attach structured metadata
+     * that makes feedback actionable (e.g. which endpoint failed, what IDs
+     * were involved, what you were trying to do).
+     *
+     * @example
+     * await commune.feedback.submit({
+     *   type: 'error',
+     *   message: 'Thread list returns 500 when inbox has never received a message',
+     *   context: { inbox_id: 'inb_123', status_code: 500 },
+     * });
+     *
+     * await commune.feedback.submit({
+     *   type: 'signal',
+     *   message: 'Semantic search quality on long threads is excellent',
+     * });
+     */
+    submit: async (payload: FeedbackSubmitPayload) => {
+      return this.request<FeedbackResult>('/v1/feedback', {
+        method: 'POST',
+        json: payload as unknown as Record<string, unknown>,
       });
     },
   };

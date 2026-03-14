@@ -47,6 +47,9 @@ export type {
   CreditBalance,
   CreditBundle,
   CreditCheckoutResult,
+  FeedbackType,
+  FeedbackSubmitPayload,
+  FeedbackResult,
 } from './types.js';
 export { verifyResendWebhook, verifyCommuneWebhook, computeCommuneSignature } from './webhooks.js';
 export type { CommuneWebhookHeaders } from './webhooks.js';
