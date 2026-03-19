@@ -35,12 +35,34 @@ import type {
 
 const DEFAULT_BASE_URL = 'https://api.commune.email';
 
-export type ClientOptions = {
-  baseUrl?: string;
-  apiKey: string;
-  headers?: Record<string, string>;
-  fetcher?: typeof fetch;
-};
+/**
+ * x402Client interface — matches the x402 SDK's client shape.
+ * Developers can pass their own pre-configured x402Client for full control
+ * over signers, networks, and policies.
+ */
+export interface X402ClientLike {
+  [key: string]: unknown;
+}
+
+/**
+ * Client options — two auth modes:
+ *
+ * 1. API key (existing Stripe subscription):
+ *    `new CommuneClient({ apiKey: 'comm_xxx' })`
+ *
+ * 2. Wallet (x402 pay-per-call):
+ *    `new CommuneClient({ wallet: '0xPRIVATE_KEY' })`
+ *    `new CommuneClient({ wallet: x402Client })`
+ *
+ * 3. Auto-detect from environment:
+ *    `new CommuneClient()`
+ *    Reads COMMUNE_API_KEY or COMMUNE_WALLET_KEY.
+ */
+export type ClientOptions =
+  | { apiKey: string;  baseUrl?: string; headers?: Record<string, string>; fetcher?: typeof fetch }
+  | { wallet: string | X402ClientLike; baseUrl?: string; headers?: Record<string, string> }
+  | { baseUrl?: string; headers?: Record<string, string> }
+  ;
 
 const buildQuery = (params: Record<string, string | number | undefined>) => {
   const query = new URLSearchParams();
@@ -59,13 +81,105 @@ export class CommuneClient {
   private apiKey: string;
   private headers?: Record<string, string>;
   private fetcher: typeof fetch;
+  private authMode: 'apikey' | 'wallet';
   private deprecationWarnings = new Set<string>();
 
-  constructor(options: ClientOptions) {
-    this.baseUrl = (options.baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '');
-    this.apiKey = options.apiKey;
-    this.headers = options.headers;
-    this.fetcher = options.fetcher || fetch;
+  /**
+   * Create a Commune client.
+   *
+   * @example
+   * // API key auth (existing Stripe subscription)
+   * const client = new CommuneClient({ apiKey: 'comm_xxx' });
+   *
+   * // Wallet auth (x402 pay-per-call, defaults to Base)
+   * const client = new CommuneClient({ wallet: '0xPRIVATE_KEY' });
+   *
+   * // Wallet auth with pre-configured x402Client (full control)
+   * const client = new CommuneClient({ wallet: x402Client });
+   *
+   * // Auto-detect from COMMUNE_API_KEY or COMMUNE_WALLET_KEY env vars
+   * const client = new CommuneClient();
+   */
+  constructor(options?: ClientOptions) {
+    const opts = options || {};
+    this.baseUrl = (opts.baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '');
+    this.headers = 'headers' in opts ? opts.headers : undefined;
+
+    // Resolve auth mode
+    if ('apiKey' in opts && opts.apiKey) {
+      this.apiKey = opts.apiKey;
+      this.authMode = 'apikey';
+      this.fetcher = ('fetcher' in opts ? opts.fetcher : undefined) || fetch;
+    } else if ('wallet' in opts && opts.wallet) {
+      this.apiKey = '';
+      this.authMode = 'wallet';
+      this.fetcher = CommuneClient.createX402Fetcher(opts.wallet);
+    } else {
+      // Auto-detect from environment
+      const envApiKey = typeof process !== 'undefined' ? process.env?.COMMUNE_API_KEY : undefined;
+      const envWallet = typeof process !== 'undefined' ? process.env?.COMMUNE_WALLET_KEY : undefined;
+
+      if (envApiKey) {
+        this.apiKey = envApiKey;
+        this.authMode = 'apikey';
+        this.fetcher = fetch;
+      } else if (envWallet) {
+        this.apiKey = '';
+        this.authMode = 'wallet';
+        this.fetcher = CommuneClient.createX402Fetcher(envWallet);
+      } else {
+        throw new Error(
+          'No auth configured. Pass { apiKey } or { wallet }, or set COMMUNE_API_KEY / COMMUNE_WALLET_KEY.'
+        );
+      }
+    }
+  }
+
+  /**
+   * Create an x402-wrapped fetch that handles 402 Payment Required responses.
+   *
+   * Accepts either:
+   * - A private key string: creates a viem wallet and wraps fetch with @x402/fetch
+   * - An x402Client instance: wraps fetch with the pre-configured client
+   */
+  private static createX402Fetcher(wallet: string | X402ClientLike): typeof fetch {
+    // Lazy-load x402 dependencies — they're optional peer deps.
+    // Use createRequire for ESM compatibility (the SDK is "type": "module").
+    let loadModule: (id: string) => any;
+    try {
+      const { createRequire } = require('module');
+      loadModule = createRequire(typeof __filename !== 'undefined' ? __filename : import.meta.url);
+    } catch {
+      // Fallback for environments where module.createRequire is unavailable
+      loadModule = require;
+    }
+
+    try {
+      if (typeof wallet === 'string') {
+        // Private key → create x402Client with EVM signer on Base
+        const { x402Client, wrapFetchWithPayment } = loadModule('@x402/fetch');
+        const { registerExactEvmScheme } = loadModule('@x402/evm/exact/client');
+        const { privateKeyToAccount } = loadModule('viem/accounts');
+
+        const client = new x402Client();
+        const signer = privateKeyToAccount(wallet.startsWith('0x') ? wallet : `0x${wallet}`);
+        registerExactEvmScheme(client, { signer });
+
+        return wrapFetchWithPayment(fetch, client);
+      } else {
+        // Pre-configured x402Client — use it directly
+        const { wrapFetchWithPayment } = loadModule('@x402/fetch');
+        return wrapFetchWithPayment(fetch, wallet);
+      }
+    } catch (err: any) {
+      if (err?.code === 'MODULE_NOT_FOUND' || err?.code === 'ERR_MODULE_NOT_FOUND' || err instanceof ReferenceError) {
+        throw new Error(
+          'x402 wallet mode requires @x402/fetch and @x402/evm. Install them:\n' +
+          '  npm install @x402/fetch @x402/evm viem'
+        );
+      }
+      throw err;
+    }
   }
 
   private warnDeprecated(key: string, message: string) {

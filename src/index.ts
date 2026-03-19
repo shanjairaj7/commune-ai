@@ -1,4 +1,5 @@
 export { CommuneClient } from './client.js';
+export type { ClientOptions, X402ClientLike } from './client.js';
 export type {
   ApiError,
   ApiResponse,
