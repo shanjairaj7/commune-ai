@@ -1,6 +1,6 @@
 # commune-ai
 
-> TypeScript/Node.js SDK for giving AI agents dedicated email inboxes.
+> TypeScript/Node.js SDK for giving AI agents dedicated email inboxes and SMS capabilities.
 
 commune-ai is a TypeScript package that enables AI agents (LangChain, CrewAI, OpenAI Agents SDK, Claude) to send and receive email, manage conversation threads, and handle inbound webhook events.
 

@@ -412,6 +412,129 @@ export interface DeliverySuppressionsParams {
   limit?: number;
 }
 
+// ─── Phone Numbers ────────────────────────────────────────────────
+
+export interface AvailablePhoneNumber {
+  phoneNumber: string;
+  friendlyName: string;
+  capabilities: { sms: boolean; mms: boolean; voice: boolean };
+  region?: string;
+  locality?: string;
+  postalCode?: string;
+}
+
+export interface ProvisionPhoneNumberPayload {
+  phone_number?: string;
+  type?: 'tollfree' | 'local';
+  country?: string;
+  friendly_name?: string;
+  area_code?: string;
+}
+
+export interface PhoneNumber {
+  id: string;
+  number: string;
+  numberType: 'tollfree' | 'local' | 'shortcode';
+  friendlyName: string | null;
+  country: string;
+  capabilities: { sms: boolean; mms: boolean; voice: boolean };
+  status: 'active' | 'released' | 'suspended_non_payment';
+  allowList: string[];
+  blockList: string[];
+  creditCostPerMonth: number;
+  autoReply: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PhoneNumberWebhookPayload {
+  endpoint?: string;
+  secret?: string;
+  events?: string[];
+}
+
+export interface UpdatePhoneNumberPayload {
+  friendlyName?: string;
+  autoReply?: string | null;
+  allowList?: string[];
+  blockList?: string[];
+  webhook?: PhoneNumberWebhookPayload;
+}
+
+// ─── SMS ─────────────────────────────────────────────────────────
+
+export interface SmsConversation {
+  thread_id: string;
+  remote_number: string;
+  phone_number_id: string;
+  last_message_at: string;
+  last_message_preview: string | null;
+  message_count: number;
+  unread_count: number;
+}
+
+export interface SmsMessage {
+  message_id: string;
+  thread_id: string;
+  direction: 'inbound' | 'outbound';
+  content: string | null;
+  created_at: string;
+  metadata: {
+    delivery_status: string | null;
+    from_number: string | null;
+    to_number: string | null;
+    phone_number_id: string | null;
+    message_sid: string | null;
+    credits_charged: number | null;
+    sms_segments: number | null;
+    has_attachments: boolean;
+    mms_media: unknown[] | null;
+  };
+}
+
+export interface SendSmsPayload {
+  to: string;
+  body: string;
+  phone_number_id?: string;
+  media_url?: string[];
+}
+
+export interface SendSmsResult {
+  message_id: string;
+  thread_id: string;
+  message_sid: string;
+  status: string;
+  credits_charged: number;
+  segments: number;
+}
+
+export interface SmsConversationListParams {
+  phone_number_id?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface SmsSearchParams {
+  q: string;
+  phone_number_id?: string;
+  limit?: number;
+}
+
+export interface SmsListParams {
+  phone_number_id?: string;
+  limit?: number;
+  before?: string;
+  after?: string;
+}
+
+export interface SmsSuppression {
+  phone_number: string;
+  orgId: string;
+  phone_number_id?: string;
+  reason?: string;
+  created_at?: string;
+}
+
 // ─── Credits ─────────────────────────────────────────────────────
 
 export interface CreditBalance {
