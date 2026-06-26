@@ -26,6 +26,19 @@ import type {
   DeliveryEventsParams,
   DeliverySuppressionsParams,
   SuppressionEntry,
+  PhoneNumber,
+  UpdatePhoneNumberPayload,
+  PhoneNumberWebhookPayload,
+  AvailablePhoneNumber,
+  ProvisionPhoneNumberPayload,
+  SmsConversation,
+  SmsConversationListParams,
+  SmsMessage,
+  SmsListParams,
+  SmsSuppression,
+  SendSmsPayload,
+  SendSmsResult,
+  SmsSearchParams,
   CreditBalance,
   CreditBundle,
   CreditCheckoutResult,
@@ -568,6 +581,116 @@ export class CommuneClient {
       }
       return this.request<AttachmentRecord>(
         `/v1/attachments/${encodeURIComponent(attachmentId)}`
+      );
+    },
+  };
+
+  phoneNumbers = {
+    list: async () => {
+      return this.request<PhoneNumber[]>('/v1/phone-numbers');
+    },
+    get: async (phoneNumberId: string) => {
+      return this.request<PhoneNumber>(`/v1/phone-numbers/${encodeURIComponent(phoneNumberId)}`);
+    },
+    update: async (phoneNumberId: string, payload: UpdatePhoneNumberPayload) => {
+      return this.request<PhoneNumber>(
+        `/v1/phone-numbers/${encodeURIComponent(phoneNumberId)}`,
+        { method: 'PATCH', json: payload as unknown as Record<string, unknown> }
+      );
+    },
+    available: async (params?: { type?: 'TollFree' | 'Local'; country?: string; area_code?: string; limit?: number }) => {
+      return this.request<AvailablePhoneNumber[]>(
+        `/v1/phone-numbers/available${buildQuery({
+          type: params?.type,
+          country: params?.country,
+          area_code: params?.area_code,
+          limit: params?.limit,
+        })}`
+      );
+    },
+    provision: async (payload?: ProvisionPhoneNumberPayload) => {
+      return this.request<PhoneNumber>('/v1/phone-numbers', {
+        method: 'POST',
+        json: (payload ?? {}) as unknown as Record<string, unknown>,
+      });
+    },
+    release: async (phoneNumberId: string) => {
+      return this.request<{ id: string; status: string; message: string }>(
+        `/v1/phone-numbers/${encodeURIComponent(phoneNumberId)}`,
+        { method: 'DELETE' }
+      );
+    },
+    setAllowList: async (phoneNumberId: string, numbers: string[]) => {
+      return this.request<PhoneNumber>(
+        `/v1/phone-numbers/${encodeURIComponent(phoneNumberId)}/allow-list`,
+        { method: 'PUT', json: { numbers } }
+      );
+    },
+    setBlockList: async (phoneNumberId: string, numbers: string[]) => {
+      return this.request<PhoneNumber>(
+        `/v1/phone-numbers/${encodeURIComponent(phoneNumberId)}/block-list`,
+        { method: 'PUT', json: { numbers } }
+      );
+    },
+    setWebhook: async (phoneNumberId: string, payload: PhoneNumberWebhookPayload) => {
+      return this.request<PhoneNumber>(
+        `/v1/phone-numbers/${encodeURIComponent(phoneNumberId)}`,
+        { method: 'PATCH', json: { webhook: payload } as unknown as Record<string, unknown> }
+      );
+    },
+  };
+
+  sms = {
+    list: async (params: SmsListParams = {}) => {
+      return this.request<SmsMessage[]>(
+        `/v1/sms${buildQuery({
+          phone_number_id: params.phone_number_id,
+          limit: params.limit,
+          before: params.before,
+          after: params.after,
+        })}`
+      );
+    },
+    send: async (payload: SendSmsPayload) => {
+      return this.request<SendSmsResult>('/v1/sms/send', {
+        method: 'POST',
+        json: payload as unknown as Record<string, unknown>,
+      });
+    },
+    conversations: async (params: SmsConversationListParams = {}) => {
+      return this.request<SmsConversation[]>(
+        `/v1/sms/conversations${buildQuery({
+          phone_number_id: params.phone_number_id,
+          limit: params.limit,
+          cursor: params.cursor,
+        })}`
+      );
+    },
+    thread: async (remoteNumber: string, phoneNumberId?: string) => {
+      return this.request<SmsMessage[]>(
+        `/v1/sms/conversations/${encodeURIComponent(remoteNumber)}${buildQuery({
+          phone_number_id: phoneNumberId,
+        })}`
+      );
+    },
+    search: async (params: SmsSearchParams) => {
+      return this.request<SmsMessage[]>(
+        `/v1/sms/search${buildQuery({
+          q: params.q,
+          phone_number_id: params.phone_number_id,
+          limit: params.limit,
+        })}`
+      );
+    },
+    suppressions: async (phoneNumberId?: string) => {
+      return this.request<SmsSuppression[]>(
+        `/v1/sms/suppressions${buildQuery({ phone_number_id: phoneNumberId })}`
+      );
+    },
+    removeSuppression: async (phoneNumber: string) => {
+      return this.request<{ removed: boolean; phone_number: string }>(
+        `/v1/sms/suppressions/${encodeURIComponent(phoneNumber)}`,
+        { method: 'DELETE' }
       );
     },
   };
