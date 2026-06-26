@@ -1,6 +1,6 @@
 {
   "name": "commune-ai",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Email infrastructure for agents — set up an inbox and send your first email in 30 seconds. Programmatic inboxes (~1 line), consistent threads, custom domains, attachments, and structured data.",
   "type": "module",
   "main": "dist/index.js",
